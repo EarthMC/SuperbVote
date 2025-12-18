@@ -7,14 +7,18 @@ import org.bukkit.configuration.ConfigurationSection;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class VoteMessages {
     public static VoteMessage from(ConfigurationSection root, String section) {
-        return from(root, section, false, false);
+        return from(root, section, false, MessageType.PLAIN);
     }
 
-    public static VoteMessage from(ConfigurationSection root, String section, boolean optional, boolean jsonText) {
+    public static VoteMessage from(ConfigurationSection root, String section, boolean optional, MessageType type) {
         if (root.contains(section)) {
             if (root.isString(section)) {
                 String message = root.getString(section);
-                return jsonText ? new JsonTextMessage(message) : new PlainStringMessage(message);
+                return switch (type) {
+                    case PLAIN -> new PlainStringMessage(message);
+                    case JSON -> new JsonTextMessage(message);
+                    case MINIMESSAGE -> new ComponentVoteMessage(message);
+                };
             }
         } else if (optional) {
             return null;

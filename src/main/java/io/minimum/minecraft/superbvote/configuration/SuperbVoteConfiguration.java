@@ -6,10 +6,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.pool.HikariPool;
 import io.minimum.minecraft.superbvote.SuperbVote;
 import io.minimum.minecraft.superbvote.commands.CommonCommand;
-import io.minimum.minecraft.superbvote.configuration.message.OfflineVoteMessages;
-import io.minimum.minecraft.superbvote.configuration.message.PlainStringMessage;
-import io.minimum.minecraft.superbvote.configuration.message.VoteMessage;
-import io.minimum.minecraft.superbvote.configuration.message.VoteMessages;
+import io.minimum.minecraft.superbvote.configuration.message.*;
 import io.minimum.minecraft.superbvote.storage.JsonVoteStorage;
 import io.minimum.minecraft.superbvote.storage.MysqlVoteStorage;
 import io.minimum.minecraft.superbvote.storage.VoteStorage;
@@ -99,11 +96,11 @@ public class SuperbVoteConfiguration {
             configurationError = true;
         }
 
-        reminderMessage = VoteMessages.from(configuration, "vote-reminder.message");
+        reminderMessage = VoteMessages.from(configuration, "vote-reminder.message", false, MessageType.MINIMESSAGE);
 
         if (configuration.getBoolean("vote-command.enabled")) {
-            boolean useJson = configuration.getBoolean("vote-command.use-json-text");
-            VoteMessage voteMessage = VoteMessages.from(configuration, "vote-command.text", false, useJson);
+            String type = configuration.getString("vote-command.type");
+            VoteMessage voteMessage = VoteMessages.from(configuration, "vote-command.text", false, MessageType.get(type));
             voteCommand = new CommonCommand(SuperbVote.getPlugin(), voteMessage, false);
         } else {
             voteCommand = null;
@@ -111,8 +108,8 @@ public class SuperbVoteConfiguration {
 
         streaksConfiguration = initializeStreaksConfiguration();
         if (streaksConfiguration.isEnabled() && configuration.getBoolean("streaks.command.enabled")) {
-            boolean useJson = configuration.getBoolean("streaks.command.use-json-text");
-            VoteMessage voteStreakMessage = VoteMessages.from(configuration, "streaks.command.text", false, useJson);
+            String type = configuration.getString("streaks.command.type");
+            VoteMessage voteStreakMessage = VoteMessages.from(configuration, "streaks.command.text", false, MessageType.get(type));
             voteStreakCommand = new CommonCommand(SuperbVote.getPlugin(), voteStreakMessage, true);
         } else {
             voteStreakCommand = null;
@@ -139,8 +136,8 @@ public class SuperbVoteConfiguration {
         String name = section.getName();
 
         List<String> commands = section.getStringList("commands");
-        VoteMessage broadcast = VoteMessages.from(section, "broadcast-message", true, false);
-        VoteMessage playerMessage = VoteMessages.from(section, "player-message", true, false);
+        VoteMessage broadcast = VoteMessages.from(section, "broadcast-message", true, MessageType.MINIMESSAGE);
+        VoteMessage playerMessage = VoteMessages.from(section, "player-message", true, MessageType.MINIMESSAGE);
 
         List<RewardMatcher> rewards = RewardMatchers.getMatchers(section.getConfigurationSection("if"));
         boolean cascade = section.getBoolean("allow-cascading");
