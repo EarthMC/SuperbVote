@@ -14,6 +14,7 @@ import io.minimum.minecraft.superbvote.util.BrokenNag;
 import io.minimum.minecraft.superbvote.util.cooldowns.VoteServiceCooldown;
 import io.minimum.minecraft.superbvote.votes.SuperbVoteListener;
 import io.minimum.minecraft.superbvote.votes.VoteParty;
+import io.minimum.minecraft.superbvote.votes.VotePlaceholderExpansion;
 import io.minimum.minecraft.superbvote.votes.VoteReminder;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import lombok.Getter;
@@ -46,6 +47,8 @@ public class SuperbVote extends JavaPlugin {
     private final boolean foliaDetected = isFolia();
     @Getter
     private final VoteParty voteParty = new VoteParty(this);
+
+    private VotePlaceholderExpansion placeholderExpansion = null;
 
     @Override
     public void onEnable() {
@@ -106,6 +109,8 @@ public class SuperbVote extends JavaPlugin {
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             getLogger().info("Using clip's PlaceholderAPI to provide extra placeholders.");
+            placeholderExpansion = new VotePlaceholderExpansion(this);
+            placeholderExpansion.register();
         }
 
         // Disable update checking
@@ -121,6 +126,10 @@ public class SuperbVote extends JavaPlugin {
         if (voteReminderTask != null) {
             voteReminderTask.cancel();
             voteReminderTask = null;
+        }
+        if (placeholderExpansion != null) {
+            placeholderExpansion.unregister();
+            placeholderExpansion = null;
         }
         voteStorage.save();
         queuedVotes.save();
